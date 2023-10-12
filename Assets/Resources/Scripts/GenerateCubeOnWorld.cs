@@ -1,56 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GenerateCubeOnWorld : MonoBehaviour
 {
-	//生成されるオブジェクトのプレハブ
-	public GameObject boxPrefab;
+    //生成されるオブジェクトのプレハブ
+    [SerializeField]
+    private GameObject boxPrefab;
 
-	[SerializeField]
-	Camera _camera;
+    private Camera mainCam;
 
-	// Use this for initialization
-	void Start () {
-	}
+    void Awake()
+    {
+        mainCam = Camera.main;
+    }
+    
+    private void Update()
+    {
+        //画面タップした際の処理
+        if (Input.GetMouseButtonDown(0))
+        {
+            var ray = mainCam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out var hit))
+            {
+                Debug.Log("光線が当たったオブジェクトの情報");
+                Debug.Log("名前：　" + hit.transform.name);
+                Debug.Log("位置：　" + hit.transform.position);
+                Debug.Log("距離：　" + hit.distance);
 
-	// Update is called once per frame
-	void Update () {
-		//画面タップした際の処理
-		if (Input.GetMouseButtonDown(0))
-		{
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-			if (Physics.Raycast(ray, out RaycastHit hit))
-			{
-				Debug.Log("光線が当たったオブジェクトの情報");
-				Debug.Log("名前：　" + hit.transform.name);
-				Debug.Log("位置：　" + hit.transform.position);
-				Debug.Log("距離：　" + hit.distance);
-				
-				
-				hit.transform.GetComponent<MeshRenderer>().material.color = Color.green;
-				
-				//hit.point ヒットした座標
-
-				Instantiate (boxPrefab, hit.point, Quaternion.identity);
-			}
-		}
-	}
-
-	
-	(int, int) GetCellPositionOnGrid(Mesh plane)
-	{
-		Bounds b = plane.bounds;
-		(float, float) xzMaxPosition = (b.max.x, b.max.z);
-		(float, float) xzMinPosition = (b.min.x, b.min.z);
-
-		int xCellNum = 4;
-		int zCellNum = 4;
-		float xCellSize = (xzMaxPosition.Item1 - xzMinPosition.Item1) / xCellNum;
-		float zCellSize = (xzMaxPosition.Item2 - xzMinPosition.Item2) / zCellNum;
-
-		return (0, 0);
-	}
-	
+                if (hit.transform.GetComponent<ObjectValue>() != null)
+                {
+                    if (hit.transform.GetComponent<ObjectValue>().index[0] == -1)
+                    {
+                        // GameObject obj = Instantiate(boxPrefab, hit.point, Quaternion.identity);
+                        GameObject obj = Instantiate(boxPrefab, hit.transform.position, Quaternion.identity);
+                        
+                        obj.GetComponent<FallObject>().init(hit.transform.GetComponent<ObjectValue>().index[2],hit.transform.GetComponent<ObjectValue>().index[1]);
+                        obj.SetActive(true);
+                    }
+                }
+            }
+        }
+    }
 }
