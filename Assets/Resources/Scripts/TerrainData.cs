@@ -6,7 +6,8 @@ using UnityEngine;
 public class TerrainData : MonoBehaviour
 {
     public static TerrainData instance;
-    private List<List<List<int>>> map;
+    public List<List<List<int>>> map;
+    public List<List<int>> heightmap2d;
 
     void Awake()
     {
@@ -15,27 +16,44 @@ public class TerrainData : MonoBehaviour
     }
     void init()
     {
-        map = new List<List<List<int>>>(10);
+        map = new List<List<List<int>>>();
+        heightmap2d = new List<List<int>>();
         for (int i = 0; i < 5; i++) {
-            map.Add(new List<List<int>>(5));
+            map.Add(new List<List<int>>());
             for (int j = 0; j < 5; j++) {
-                map[i].Add(new List<int>(5));
-                for (int k = 0; k < 5; k++)
+                map[i].Add(new List<int>());
+                for (int k = 0; k < 10; k++)
                 {
-                    map[i][j][k] = -1;
+                    map[i][j].Add(-1);
                 }
             }
         }
+
+        for (int i = 0; i < 5; i++)
+        {
+            heightmap2d.Add(new List<int>());
+            for (int j = 0; j < 5; j++)
+            {
+                heightmap2d[i].Add(0);
+            }
+        }
+
     }
     
     public int fallItem(int x, int y, int type)
     {
-        for (int i = map.Count; i >1; i--)
+        for (int i = map.Count; i >= 1; i--)
         {
-            if (map[i - 1][y][x] != -1)
+            if (map[y][x][i - 1] != -1)
             {
-                map[i][y][x] = type;
+                map[y][x][i] = type;
+                heightmap2d[y][x] = i;
                 return i;
+            } else if (i == 1)
+            {
+                map[y][x][0] = type;
+                heightmap2d[y][x] = 0;
+                return i - 1;
             }
         }
 
